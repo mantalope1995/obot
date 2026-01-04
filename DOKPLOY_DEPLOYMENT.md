@@ -30,21 +30,6 @@ This guide walks you through deploying Obot using Dokploy, a self-hosted PaaS pl
 
 ### 1. Prepare Your Environment
 
-#### Create Required Directories
-
-SSH into your server and create the data directories:
-
-```bash
-# Create main directories
-sudo mkdir -p /opt/obot/data
-sudo mkdir -p /opt/obot/postgres
-
-# Set proper permissions
-sudo chown -R 1000:1000 /opt/obot/data
-sudo chown -R 70:70 /opt/obot/postgres
-sudo chmod -R 755 /opt/obot
-```
-
 #### Generate Required Secrets
 
 ```bash
@@ -85,10 +70,6 @@ OPENAI_API_KEY=your-actual-openai-api-key
 
 # Encryption Configuration
 OBOT_SERVER_ENCRYPTION_KEY=your_generated_encryption_key
-
-# Volume Paths (ensure these match your actual directories)
-OBOT_DATA_PATH=/opt/obot/data
-POSTGRES_DATA_PATH=/opt/obot/postgres
 ```
 
 **Important Security Notes:**

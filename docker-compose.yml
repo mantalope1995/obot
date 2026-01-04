@@ -84,21 +84,13 @@ services:
     networks:
       - obot-network
 
-# Volumes for data persistence
+# Volumes for data persistence (Docker named volumes)
 volumes:
   obot-data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${OBOT_DATA_PATH:-/opt/obot/data}
   
   postgres-data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${POSTGRES_DATA_PATH:-/opt/obot/postgres}
 
 # Network configuration
 networks:
