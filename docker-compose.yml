@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  obot:
+    image: ghcr.io/obot-platform/obot:latest
+    container_name: obot
+    restart: unless-stopped
+    
+    # Port mapping - adjust external port as needed for Dokploy
+    ports:
+      - "8080:8080"
+    
+    # Environment variables - load from .env file
+    env_file:
+      - .env
+    
+    # Volume mounts
+    volumes:
+      - obot-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    
+    # Resource limits - adjust based on your server capacity
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    
+    # Health check for monitoring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Network configuration
+    networks:
+      - obot-network
+    
+    # Depend on database startup
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: obot-postgres
+    restart: unless-stopped
+    
+    # Environment variables for PostgreSQL
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-obot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-obot}
+      POSTGRES_DB: ${POSTGRES_DB:-obot}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    
+    # Volume for PostgreSQL data persistence
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-obot} -d ${POSTGRES_DB:-obot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    # Network configuration
+    networks:
+      - obot-network
+
+# Volumes for data persistence
+volumes:
+  obot-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${OBOT_DATA_PATH:-/opt/obot/data}
+  
+  postgres-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${POSTGRES_DATA_PATH:-/opt/obot/postgres}
+
+# Network configuration
+networks:
+  obot-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

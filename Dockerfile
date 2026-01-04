@@ -68,7 +68,7 @@ COPY --chmod=0755 run.sh /bin/run.sh
 COPY --link --from=tools /obot-tools /obot-tools
 COPY --link --from=enterprise-tools /obot-tools /obot-tools
 COPY --link --from=provider /obot-tools /obot-tools
-COPY --chmod=0755 /tools/combine-envrc.sh /
+COPY --chmod=0755 tools/combine-envrc.sh /
 RUN /combine-envrc.sh && rm /combine-envrc.sh
 COPY --from=provider /bin/*-encryption-provider /bin/
 COPY --from=bin /app/bin/obot /bin/
